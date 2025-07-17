@@ -1,0 +1,45 @@
+#version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: bill_backend
+    ports:
+      - "8000:80"
+    volumes:
+      - ./backend/src/:/var/www/html
+    depends_on:
+      - db
+    networks:
+      - bill-network
+
+  frontend:
+    build: ./frontend
+    container_name: bill_frontend
+    ports:
+      - "80:80"
+    volumes:
+      - ./frontend/public:/usr/share/nginx/html/
+    networks:
+      - bill-network
+
+  db:
+    image: mysql:8.0
+    container_name: bill_db
+    environment:
+      MYSQL_ROOT_PASSWORD: bill_splitter_passwd
+      MYSQL_DATABASE: bill_splitter
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./backend/migrations:/docker-entrypoint-initdb.d
+    ports:
+      - "3666:3306"
+    networks:
+      - bill-network
+
+networks:
+  bill-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
